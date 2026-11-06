@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secondhand Shopping Study</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .header h1 {
+        color: #2d3748;
+        font-size: 32px;
+        margin-bottom: 8px;
+      }
+      .header p {
+        color: #718096;
+        font-size: 16px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
+        padding: 32px;
+        margin-bottom: 24px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+      }
+      .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+      .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 16px;
+      }
+      .form-group input:focus {
+        outline: none;
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+      }
+
+      .error-message {
+        color: #c53030;
+        font-size: 14px;
+        margin-top: 8px;
+        display: none;
+      }
+      .error-message.show {
+        display: block;
+      }
+
+      button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background: #4299e1;
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #3182ce;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+      }
+      .btn-primary:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-secondary {
+        background: #edf2f7;
+        color: #2d3748;
+        margin-right: 12px;
+      }
+      .btn-secondary:hover {
+        background: #e2e8f0;
+      }
+
+      .task-header {
+        background: #edf2f7;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .task-header h2 {
+        color: #2d3748;
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+
+      .participant-badge {
+        display: inline-block;
+        background: #bee3f8;
+        color: #2c5282;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .task-content {
+        color: #4a5568;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .task-instructions {
+        background: #f0fff4;
+        border-left: 4px solid #48bb78;
+        padding: 16px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+      .task-instructions h3 {
+        color: #22543d;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .task-instructions p {
+        color: #276749;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .chat-messages {
+        height: 400px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        padding: 16px;
+        background: #f7fafc;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .message {
+        display: flex;
+        gap: 8px;
+      }
+      .message.assistant {
+        justify-content: flex-start;
+      }
+      .message.user {
+        justify-content: flex-end;
+      }
+
+      .message-content {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .message.assistant .message-content {
+        background: white;
+        color: #2d3748;
+        border: 1px solid #e2e8f0;
+      }
+      .message.user .message-content {
+        background: #4299e1;
+        color: white;
+      }
+
+      .loading {
+        display: none;
+        font-size: 13px;
+        color: #718096;
+        margin-top: 8px;
+      }
+      .loading.show {
+        display: block;
+      }
+
+      .chat-input-group {
+        display: flex;
+        gap: 8px;
+      }
+      .chat-input-group input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      .chat-input-group input:focus {
+        outline: none;
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+      }
+      .chat-input-group button {
+        padding: 12px 20px;
+      }
+
+      .completion-content {
+        text-align: center;
+      }
+      .completion-content h2 {
+        color: #2d3748;
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+      .completion-content p {
+        color: #718096;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      .transcript-section {
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+        text-align: left;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .transcript-section h3 {
+        color: #2d3748;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .transcript-item {
+        margin-bottom: 12px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .transcript-item strong {
+        color: #2d3748;
+      }
+
+      .download-btn {
+        background: #48bb78;
+        color: white;
+      }
+      .download-btn:hover {
+        background: #38a169;
+      }
+
+      .end-btn {
+        background: #ed8936;
+        color: white;
+        margin-top: 12px;
+      }
+      .end-btn:hover {
+        background: #dd6b20;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Secondhand Shopping Study</h1>
+        <p>Help us understand your experience</p>
+      </div>
+
+      <!-- PHASE 1: Check-in -->
+      <div id="phase1" class="card">
+        <h2 style="color: #2d3748; margin-bottom: 20px; font-size: 20px">
+          Welcome!
+        </h2>
+        <p style="color: #4a5568; margin-bottom: 24px; line-height: 1.6">
+          Thank you for participating in our research study. We're investigating
+          how people search for and evaluate secondhand items.
+        </p>
+
+        <div class="form-group">
+          <label for="participantName">What's your name?</label>
+          <input
+            type="text"
+            id="participantName"
+            placeholder="Enter your first name"
+          />
+          <div class="error-message" id="nameError">
+            Please enter your name to continue
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="startStudy()">Let's Begin</button>
+      </div>
+
+      <!-- PHASE 2: Task -->
+      <div id="phase2" class="card hidden">
+        <div class="task-header">
+          <div class="participant-badge" id="participantBadge">P-001</div>
+          <h2>Your Task for This Week</h2>
+        </div>
+
+        <div class="task-content">
+          <h3 style="color: #2d3748; margin-bottom: 12px; font-size: 18px">
+            Find a vintage leather jacket under $50
+          </h3>
+          <p>
+            Search for a vintage or secondhand leather jacket on any secondhand
+            platform. Your budget is $50 max. Find an item that interests you
+            and document your search process.
+          </p>
+        </div>
+
+        <div class="task-instructions">
+          <h3>📋 What to do</h3>
+          <p>
+            Complete this shopping task on your preferred secondhand platforms
+            (e.g., Depop, Vinted, Poshmark, Facebook Marketplace, etc.). Take
+            note of your experience, the challenges you face, decisions you
+            make, and how you feel throughout the process.
+          </p>
+        </div>
+
+        <button class="btn-primary" onclick="moveToChat()">
+          I've completed the task
+        </button>
+        <button class="btn-secondary" onclick="goBack()">Back</button>
+      </div>
+
+      <!-- PHASE 3: Chat -->
+      <div id="phase3" class="card hidden">
+        <h2 style="color: #2d3748; margin-bottom: 8px; font-size: 18px">
+          Let's talk about your experience
+        </h2>
+        <p style="color: #718096; margin-bottom: 20px; font-size: 14px">
+          Share your thoughts—the more detail, the better.
+        </p>
+
+        <div class="chat-messages" id="chatMessages"></div>
+
+        <div class="loading" id="loading">
+          <span>Typing</span>
+          <span style="animation-delay: 0.2s">.</span>
+          <span style="animation-delay: 0.4s">.</span>
+        </div>
+
+        <div class="chat-input-group">
+          <input
+            type="text"
+            id="userInput"
+            placeholder="Type your response..."
+            onkeypress="handleKeyPress(event)"
+          />
+          <button class="btn-primary" id="sendBtn" onclick="sendMessage()">
+            Send
+          </button>
+        </div>
+
+        <button class="end-btn" onclick="displayCompletion()">
+          End Conversation
+        </button>
+      </div>
+
+      <!-- PHASE 4: Complete -->
+      <div id="phase4" class="card hidden">
+        <div class="completion-content">
+          <h2>✓ Thank you!</h2>
+          <p>Your feedback has been recorded.</p>
+
+          <div class="transcript-section">
+            <h3>Conversation Transcript</h3>
+            <div id="transcriptContent"></div>
+          </div>
+
+          <button class="download-btn" onclick="downloadTranscript()">
+            Download Transcript
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const CONFIG = {
+        apiUrl: "http://localhost:3000/api/chat",
+        saveUrl: "http://localhost:3000/api/save-transcript",
+      };
+
+      let state = {
+        participantName: "",
+        participantId: "",
+        conversationHistory: [],
+        isWaitingForResponse: false,
+      };
+
+      function showPhase(phaseNum) {
+        ["phase1", "phase2", "phase3", "phase4"].forEach((id) =>
+          document.getElementById(id).classList.add("hidden")
+        );
+        document.getElementById(`phase${phaseNum}`).classList.remove("hidden");
+      }
+
+      function startStudy() {
+        const name = document.getElementById("participantName").value.trim();
+        const error = document.getElementById("nameError");
+
+        if (!name) {
+          error.classList.add("show");
+          return;
+        }
+
+        error.classList.remove("show");
+        state.participantName = name;
+        state.participantId = `P-${String(
+          Math.floor(Math.random() * 1000)
+        ).padStart(3, "0")}`;
+        document.getElementById("participantBadge").textContent =
+          state.participantId;
+
+        showPhase(2);
+      }
+
+      function goBack() {
+        showPhase(1);
+      }
+
+      function moveToChat() {
+        showPhase(3);
+        initChat();
+      }
+
+      // The agent opens the conversation. Nothing is hardcoded here.
+      // async function initChat() {
+      //   state.conversationHistory = [];
+      //   document.getElementById("chatMessages").innerHTML = "";
+      //   await requestAgentReply(
+      //     `Hi, I'm ${state.participantName}. I've finished the task and I'm ready to start.`,
+      //     true
+      //   );
+      // }
+      async function initChat() {
+        state.conversationHistory = [];
+        document.getElementById("chatMessages").innerHTML = "";
+
+        const setup = `[Hidden setup, not from the participant] Participant name: ${state.participantName}. This week's task: Find a vintage leather jacket under $50 on a secondhand platform and document the search process. The participant says they've finished the task and is ready to talk. Open the conversation with one short question about how their search for this task went. Don't restate the study or explain the process.`;
+
+        await requestAgentReply(setup, true);
+      }
+
+      async function sendMessage() {
+        const input = document.getElementById("userInput");
+        const message = input.value.trim();
+
+        if (!message || state.isWaitingForResponse) return;
+
+        addMessage("user", message);
+        state.conversationHistory.push({ role: "user", content: message });
+        input.value = "";
+
+        await requestAgentReply(message, false);
+      }
+
+      // Sends one message to the server and shows the agent's reply
+      async function requestAgentReply(message, isStart) {
+        document.getElementById("loading").classList.add("show");
+        document.getElementById("sendBtn").disabled = true;
+        state.isWaitingForResponse = true;
+
+        try {
+          const response = await fetch(CONFIG.apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: [{ role: "user", content: message }],
+              participantId: state.participantId,
+              isStart: isStart,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          addMessage("assistant", data.message);
+          state.conversationHistory.push({
+            role: "assistant",
+            content: data.message,
+          });
+        } catch (error) {
+          console.error("Error:", error);
+          addMessage(
+            "assistant",
+            "Sorry, I had trouble connecting. Please try again."
+          );
+        } finally {
+          document.getElementById("loading").classList.remove("show");
+          document.getElementById("sendBtn").disabled = false;
+          state.isWaitingForResponse = false;
+          document.getElementById("userInput").focus();
+        }
+      }
+
+      function handleKeyPress(event) {
+        if (event.key === "Enter" && !state.isWaitingForResponse) {
+          sendMessage();
+        }
+      }
+
+      function addMessage(role, content) {
+        const messagesDiv = document.getElementById("chatMessages");
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${role}`;
+        messageDiv.innerHTML = `<div class="message-content">${escapeHtml(
+          content
+        )}</div>`;
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+
+      function escapeHtml(text) {
+        const map = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        };
+        return String(text).replace(/[&<>"']/g, (m) => map[m]);
+      }
+
+      function displayCompletion() {
+        showPhase(4);
+        generateTranscript();
+        saveTranscriptToBackend();
+      }
+
+      function generateTranscript() {
+        document.getElementById("transcriptContent").innerHTML =
+          state.conversationHistory
+            .map(
+              (msg) => `
+          <div class="transcript-item">
+            <strong>${
+              msg.role === "user" ? escapeHtml(state.participantName) : "Agent"
+            }:</strong> ${escapeHtml(msg.content)}
+          </div>
+        `
+            )
+            .join("");
+      }
+
+      async function saveTranscriptToBackend() {
+        try {
+          const response = await fetch(CONFIG.saveUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              participantId: state.participantId,
+              participantName: state.participantName,
+              taskTitle: "Find a vintage leather jacket under $50",
+              conversationHistory: state.conversationHistory,
+              timestamp: new Date().toISOString(),
+            }),
+          });
+          const data = await response.json();
+          console.log(
+            data.savedToSheets
+              ? "✓ Transcript saved to Google Sheets"
+              : "Transcript not saved to Sheets"
+          );
+        } catch (error) {
+          console.error("Error saving transcript:", error);
+        }
+      }
+
+      function downloadTranscript() {
+        const date = new Date().toISOString().split("T")[0];
+        let content = `Secondhand Shopping Study - Transcript\n==========================================\n\n`;
+        content += `Participant: ${state.participantName}\nParticipant ID: ${
+          state.participantId
+        }\nDate: ${new Date().toLocaleString()}\n\n---\n\n`;
+
+        state.conversationHistory.forEach((msg) => {
+          const speaker = msg.role === "user" ? state.participantName : "Agent";
+          content += `${speaker}:\n${msg.content}\n\n`;
+        });
+
+        const link = document.createElement("a");
+        link.setAttribute(
+          "href",
+          "data:text/plain;charset=utf-8," + encodeURIComponent(content)
+        );
+        link.setAttribute(
+          "download",
+          `transcript-${state.participantId}-${date}.txt`
+        );
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    </script>
+  </body>
+</html>
